@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      
+      // Clear activity select dropdown options (keep only the first default option)
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -20,28 +23,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        // Build participants list HTML
-        let participantsHTML = '';
-        if (details.participants.length > 0) {
-          participantsHTML = '<div class="participants-section"><p><strong>Participants:</strong></p><ul class="participants-list">';
-          details.participants.forEach(email => {
-            participantsHTML += `
-              <li>
-                ${email}
-                <button class="cancel-btn" data-activity="${name}" data-email="${email}">Cancel Registration</button>
-              </li>
-            `;
-          });
-          participantsHTML += '</ul></div>';
-        }
-
-        activityCard.innerHTML = `
+        // Create activity card content
+        const activityHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          ${participantsHTML}
         `;
+        activityCard.innerHTML = activityHTML;
+
+        // Add participants section if there are participants
+        if (details.participants.length > 0) {
+          const participantsSection = document.createElement("div");
+          participantsSection.className = "participants-section";
+          
+          const participantsTitle = document.createElement("p");
+          const titleStrong = document.createElement("strong");
+          titleStrong.textContent = "Participants:";
+          participantsTitle.appendChild(titleStrong);
+          participantsSection.appendChild(participantsTitle);
+          
+          const participantsList = document.createElement("ul");
+          participantsList.className = "participants-list";
+          
+          details.participants.forEach(email => {
+            const listItem = document.createElement("li");
+            
+            const emailText = document.createTextNode(email);
+            listItem.appendChild(emailText);
+            
+            const cancelBtn = document.createElement("button");
+            cancelBtn.className = "cancel-btn";
+            cancelBtn.textContent = "Cancel Registration";
+            cancelBtn.dataset.activity = name;
+            cancelBtn.dataset.email = email;
+            
+            listItem.appendChild(cancelBtn);
+            participantsList.appendChild(listItem);
+          });
+          
+          participantsSection.appendChild(participantsList);
+          activityCard.appendChild(participantsSection);
+        }
 
         activitiesList.appendChild(activityCard);
 
